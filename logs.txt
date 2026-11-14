@@ -1,15 +1,15 @@
-2026-11-14 18:39:46,170 listening port=8000 storage=redis
-2026-11-14 18:39:46,770 http 172.18.0.1 "GET /readyz HTTP/1.1" 200 -
-2026-11-14 18:39:46,771 http 172.18.0.1 "GET / HTTP/1.1" 200 -
-2026-11-14 18:39:46,773 http 172.18.0.1 "GET / HTTP/1.1" 200 -
-2026-11-14 18:39:47,387 http 172.18.0.1 "GET /healthz HTTP/1.1" 200 -
-2026-11-14 18:39:50,121 http 127.0.0.1 "GET /healthz HTTP/1.1" 200 -
-2026-11-14 18:39:55,392 storage_unavailable: ConnectionError
-2026-11-14 18:39:55,392 http 172.18.0.1 "GET /readyz HTTP/1.1" 503 -
-2026-11-14 18:39:58,486 storage_unavailable: ConnectionError
-2026-11-14 18:39:58,487 http 172.18.0.1 "POST /increment HTTP/1.1" 503 -
-2026-11-14 18:39:59,381 http 172.18.0.1 "GET /readyz HTTP/1.1" 200 -
-2026-11-14 18:39:59,383 http 172.18.0.1 "GET / HTTP/1.1" 200 -
-2026-11-14 18:39:59,386 http 172.18.0.1 "POST /increment HTTP/1.1" 200 -
-2026-11-14 18:39:59,388 http 172.18.0.1 "GET / HTTP/1.1" 200 -
-2026-11-14 18:40:00,171 http 127.0.0.1 "GET /healthz HTTP/1.1" 200 -
+2026-11-14 20:03:12,753 listening port=8000 storage=redis
+2026-11-14 20:03:13,351 http 172.18.0.1 "GET /readyz HTTP/1.1" 200 -
+2026-11-14 20:03:13,353 http 172.18.0.1 "GET / HTTP/1.1" 200 -
+2026-11-14 20:03:13,355 http 172.18.0.1 "GET / HTTP/1.1" 200 -
+2026-11-14 20:03:14,040 http 172.18.0.1 "GET /healthz HTTP/1.1" 200 -
+2026-11-14 20:03:16,682 http 127.0.0.1 "GET /healthz HTTP/1.1" 200 -
+2026-11-14 20:03:22,045 storage_unavailable: ConnectionError
+2026-11-14 20:03:22,045 http 172.18.0.1 "GET /readyz HTTP/1.1" 503 -
+2026-11-14 20:03:25,186 storage_unavailable: ConnectionError
+2026-11-14 20:03:25,186 http 172.18.0.1 "POST /increment HTTP/1.1" 503 -
+2026-11-14 20:03:26,077 http 172.18.0.1 "GET /readyz HTTP/1.1" 200 -
+2026-11-14 20:03:26,079 http 172.18.0.1 "GET / HTTP/1.1" 200 -
+2026-11-14 20:03:26,081 http 172.18.0.1 "POST /increment HTTP/1.1" 200 -
+2026-11-14 20:03:26,084 http 172.18.0.1 "GET / HTTP/1.1" 200 -
+2026-11-14 20:03:26,740 http 127.0.0.1 "GET /healthz HTTP/1.1" 200 -

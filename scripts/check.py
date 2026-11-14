@@ -6,22 +6,33 @@ import urllib.request
 import sys
 import json
 import atexit
+import shutil
+import signal
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+os.chdir(ROOT)
+if not (ROOT / ".env").exists():
+    shutil.copy(ROOT / ".env.example", ROOT / ".env")
 
 PROJECT = f"hw3-test-{os.getpid()}-{int(time.time())}"
 PORT = "12345"
 os.environ["HOST_PORT"] = PORT
 BASE = f"http://127.0.0.1:{PORT}"
 N = 3
-BACKUPS_DIR = Path(__file__).resolve().parent.parent / "backups"
+BACKUPS_DIR = ROOT / "backups"
 
 STAGE = 'before all stages'
 
 def cleanup():
-    subprocess.run(["docker", "compose", "-p", PROJECT, "down", "-v", "--remove-orphans"],
-                   capture_output=True)
+    try:
+        subprocess.run(["docker", "compose", "-p", PROJECT, "down", "-v", "--remove-orphans", "--rmi", "local"],
+                       capture_output=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
 
 atexit.register(cleanup)
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))
 
 def make_request(path, method="GET"):
     r = urllib.request.Request(BASE + path, method=method)
@@ -35,7 +46,7 @@ def make_request(path, method="GET"):
 
 def ensure(ok, msg):
     if not ok:
-        print(f"Error on state '{STAGE}': {msg}", file=sys.stderr)
+        print(f"Error on stage '{STAGE}': {msg}", file=sys.stderr)
         sys.exit(1)
 
 def wait(timeout=90):
@@ -54,8 +65,8 @@ def wait_status(path, expected, method="GET", timeout=60):
         if status == expected:
             return
         time.sleep(1)
-    subprocess.run(["docker", "compose", "-p", PROJECT, "ps", "-a"])
-    subprocess.run(["docker", "compose", "-p", PROJECT, "logs", "--tail", "20", "app"])
+    subprocess.run(["docker", "compose", "-p", PROJECT, "ps", "-a"], timeout=30)
+    subprocess.run(["docker", "compose", "-p", PROJECT, "logs", "--tail", "20", "app"], timeout=30)
     ensure(False, f"{method} {path}: expected {expected}, last status {status}")
 
 def get_json(path, method="GET"):
@@ -71,7 +82,10 @@ def increment():
     ensure(status == 200, f"increment failed with status {status}")
 
 def compose(*args):
-    subprocess.run(["docker", "compose", "-p", PROJECT] + list(args), check=True)
+    try:
+        subprocess.run(["docker", "compose", "-p", PROJECT] + list(args), check=True, timeout=600)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        ensure(False, f"docker compose {' '.join(args)} failed")
 
 STAGE = 'initialization'
 print(f"== {STAGE}")
@@ -115,7 +129,7 @@ compose("stop", "app", "redis")
 BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
 rid_result = subprocess.run(
     ["docker", "compose", "-p", PROJECT, "ps", "-a", "-q", "redis"],
-    check=True, capture_output=True, text=True
+    check=True, capture_output=True, text=True, timeout=30
 )
 redis_id = rid_result.stdout.strip()
 ensure(redis_id != "", "failed to get redis container id")
@@ -126,17 +140,18 @@ subprocess.run([
     "-v", f"{BACKUPS_DIR.absolute()}:/backup",
     "alpine:3.20",
     "tar", "-czpf", f"/backup/{backup_file.name}", "-C", "/data", "."
-], check=True)
+], check=True, timeout=120)
 ensure(backup_file.exists() and backup_file.stat().st_size > 0, "backup file is missing or empty")
 
 STAGE = 'collect logs'
 print(f"== {STAGE}")
-log_file = Path(__file__).resolve().parent.parent / "logs.txt"
+log_file = ROOT / "logs.txt"
 with open(log_file, "w", encoding="utf-8") as f:
     subprocess.run(
         ["docker", "compose", "-p", PROJECT, "logs", "--no-log-prefix", "app"],
         stdout=f,
-        check=True
+        check=True,
+        timeout=60
     )
 
 STAGE = 'cleanup'
