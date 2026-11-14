@@ -4,23 +4,29 @@
 
 - `app/` — исходный код приложения, зависимости и документация.
 - `Dockerfile` — инструкция для сборки Docker-образа.
+- `compose.yaml` — описание сервиса и именованного тома.
+- `.env.example` — шаблон переменных окружения.
 - `logs.txt` — вывод логов работающего контейнера.
 
-### Сборка образа
+## Переменные окружения
 
-Сборка выполняется из корня репозитория.
+Переменные лежат в .env, пример переменных в .env.example
 
-```bash
-docker build -t hw3-app .
-```
+## Запуск
 
-### Запуск
+Сборка образа и запуск выполняются одной командой из корня репозитория:
 
 ```bash
-docker run -d --name hw3-counter -p 8080:8000 -e GREETING="hello" hw3-app
+docker compose up -d
 ```
 
-### Работа
+Проверка статуса:
+
+```bash
+docker compose ps
+```
+
+## Проверка работы
 
 Начальное состояние
 
@@ -28,10 +34,20 @@ docker run -d --name hw3-counter -p 8080:8000 -e GREETING="hello" hw3-app
 curl -fsS http://127.0.0.1:8080/
 ```
 
+```json
+{"greeting": "hello", "count": 0, "hostname": "e93e304511a4", "storage": "sqlite"}
+```
+
 Увеличение счетчика
 
 ```bash
 curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS -X POST http://127.0.0.1:8080/increment
+curl -fsS -X POST http://127.0.0.1:8080/increment
+```
+
+```json
+{"greeting": "hello", "count": 3, "hostname": "e93e304511a4", "storage": "sqlite"}
 ```
 
 Повторный get
@@ -39,8 +55,43 @@ curl -fsS -X POST http://127.0.0.1:8080/increment
 ```bash
 curl -fsS http://127.0.0.1:8080/
 ```
-Проверка готовности:
+
+```json
+{"greeting": "hello", "count": 3, "hostname": "e93e304511a4", "storage": "sqlite"}
+```
+
+Проверка готовности
 
 ```bash
 curl -fsS http://127.0.0.1:8080/readyz
 ```
+
+```json
+{"status": "ready", "storage": "sqlite"}
+```
+
+## Проверка сохранения данных
+
+Удаляем контейнер без удаления тома
+
+```bash
+docker compose down
+```
+
+Поднимаем заново
+
+```bash
+docker compose up -d
+```
+
+Проверяем счётчик
+
+```bash
+curl -fsS http://127.0.0.1:8080/
+```
+
+```json
+{"greeting": "hello", "count": 3, "hostname": "ac58cbd7fa7f", "storage": "sqlite"}
+```
+
+`count` остался равен 3.

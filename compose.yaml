@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${HOST_PORT}:${PORT}"
+    env_file:
+      - .env
+    volumes:
+      - counter_data:/data
+
+volumes:
+  counter_data:
