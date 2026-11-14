@@ -14,6 +14,14 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "1.0"
 
   redis:
     image: redis:7.4-alpine
